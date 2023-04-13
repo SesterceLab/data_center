@@ -7,13 +7,13 @@ dpkg -i zabbix-release_6.4-1+ubuntu20.04_all.deb
 apt update
 apt install zabbix-agent
 rm zabbix-release_6.4-1+ubuntu20.04_all.deb
-systemctl restart zabbix-agent
+mkdir /etc/zabbix/zabbix_agentd.conf.d
 sh -c "openssl rand -hex 32 > /etc/zabbix/zabbix_agentd.psk"
 rm /etc/zabbix/zabbix_agentd.conf
-git clone https://github.com/SesterceLab/data_center
 mv ./zabbix_agentd.conf /etc/zabbix/
 chmod +x ./zxgpu.sh
 ./data_center/zxgpu.sh
+systemctl status zabbix-agent
 echo "${GREEN}Remember the following key for zabbix server psk-encryption, psk-indentity gpuserver${NC}"
 cat /etc/zabbix/zabbix_agentd.psk
 echo "${GREEN}Success!${NC}"
