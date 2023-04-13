@@ -1,5 +1,3 @@
-# data_center
-
 
 # Install Zabbix-agent for linux-20.04 LTS and GPU plugin
 and plugin for GPU
