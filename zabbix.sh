@@ -14,6 +14,7 @@ sudo service zabbix-agent restart
 sudo mkdir -p /etc/zabbix/zabbix_agentd.conf.d
 sudo sh -c "openssl rand -hex 32 > /etc/zabbix/zabbix_agentd.psk"
 sudo rm -f /etc/zabbix/zabbix_agentd.conf
+cd data_center
 sudo cp ./zabbix_agentd.conf /etc/zabbix/
 chmod +x ./zxgpu.sh
 sudo ./zxgpu.sh
