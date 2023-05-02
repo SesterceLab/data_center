@@ -9,6 +9,7 @@ sudo dpkg -i zabbix-release_6.4-1+ubuntu20.04_all.deb
 sudo apt update
 sudo apt -y install zabbix-agent
 rm zabbix-release_6.4-1+ubuntu20.04_all.deb
+systemctl enable zabbix-agent
 sudo service zabbix-agent restart
 sudo mkdir -p /etc/zabbix/zabbix_agentd.conf.d
 sudo sh -c "openssl rand -hex 32 > /etc/zabbix/zabbix_agentd.psk"
