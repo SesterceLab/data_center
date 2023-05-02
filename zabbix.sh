@@ -17,7 +17,7 @@ sudo rm -f /etc/zabbix/zabbix_agentd.conf
 sudo cp ./zabbix_agentd.conf /etc/zabbix/
 chmod +x ./zxgpu.sh
 sudo ./zxgpu.sh
-sudo sevice zabbix-agent restart
+sudo service zabbix-agent restart
 sudo systemctl status zabbix-agent
 echo "${GREEN}Remember the following key for zabbix server psk-encryption, psk-indentity gpuserver${NC}"
 cat /etc/zabbix/zabbix_agentd.psk
