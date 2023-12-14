@@ -9,11 +9,6 @@ All machines with ubuntu_20.04 system with default user.
 ```bash
 sudo apt-get upgrade && sudo apt-get update
 ```
-create a user for slurm and nfs for all machines with same UIDs and GIDs
-```bash
-sudo adduser -u 1121 slurm --disabled-password --gecos ""
-```
-
 ## 2. Install NFS_server on storage node and NFS_client on master and worker nodes. 
 ###  1. On storage node
 ```bash
@@ -30,7 +25,7 @@ sudo mkdir /storage
 This storage location can be mouted hard disk  
 Change ownership of this position, for this example, i give permission to default slurm user, this user will be used for slurm.  
 ```bash
-sudo chown slurm:slurm /storage
+sudo chown zhb:zhb h /storage
 ```
 Adding line /etc/exports with 
 ```bash
@@ -49,8 +44,15 @@ should allow port 2049
 ### 2. On master nodes and worker nodes
 Edit /etc/hosts file, add storage IP address
 ```bash
-192.168.100.141 storage
+192.168.100.208 storage
+192.168.100.177 master2
+192.168.100.197 worker1
+192.168.100.211 master1
+192.168.100.179 worker2
 ```
+We can delete the 127.0.1.1 line.
+We can also put one host file in /storage folder, and copy this file to all machines, when we setup nfs share storage.
+
 Install nfs-client 
 ```bash
 sudo apt install nfs-common -y
@@ -58,7 +60,7 @@ sudo apt install nfs-common -y
 make postion /storage and give ownership to user slurm the same as storage node.
 ```bash
 sudo mkdir /storage
-sudo chown slurm:slurm /storage
+sudo chown hbz:hbz /storage
 ```
 Mount /storage
 ```bash
@@ -66,7 +68,7 @@ sudo mount storage:/storage /storage
 ```
 To make the drive mount upon restarts for the worker nodes, add this to fstab   
 ```bash
-echo master:/storage /storage nfs auto,timeo=14,intr 0 0 | sudo tee -a /etc/fstab
+echo storage:/storage /storage nfs auto,timeo=14,intr 0 0 | sudo tee -a /etc/fstab
 ```
 Test: change to slurm user, each machine should be able to read and write the files in /storage folder.
 
@@ -75,8 +77,8 @@ Allow SSH connection between master nodes and workers.
 ### 1. On master nodes
 ```bash
 ssh-keygen 
-ssh-copy-id 192.168.100.148 
-ssh-copy-id 192.168.100.156
+ssh-copy-id hbz@worker1 
+ssh-copy-id hbz@worker2
 ```
 ### 2. Install slurm and munge on all master nodes and worker nodes. 
 ```bash
@@ -106,6 +108,10 @@ sudo systemctl restart munge
 We can go to this website to generate a configuration file: https://slurm.schedmd.com/configurator.html
 CPU information and memory information can be found using:
 ```bash
+sudo slurmd -C
+```
+Or
+```bash
 lscpu
 free -m
 ```
@@ -127,10 +133,9 @@ Othe configurations:
 - TaskPlugin=task/affinity  
 Database configuration:
 - AccountingStoragePort=6819
-- AccountingStorageType=accounting_storage/slurmdbd
+  AccountingStorageType=accounting_storage/slurmdbd
 - AccountingStorageUser=slurm
-The configuration slurm.conf  is here in the repository.
-
+The configuration slurm.conf  is here in the repository.  .  
 We create the configuration file slurm.conf at /storage
 
 ```bash
@@ -138,10 +143,107 @@ nano slurm.conf
 ```
 Copy the configuration. On all machines change ownership of the slurm.conf to slurm
 ```bash
-sudo chown slurm:slurm /etc/munge/munge.key
+sudo chown zhb:zhb /etc/munge/munge.key
 ```
 On all machines, copy the slurm.conf to /etc/slurm-llnl/
 ```bash
 sudo cp /storage/slurm.conf /etc/slurm-llnl/
 ```
-### 4. Generate Cgroup.conf
+
+For master nodes:  
+
+```bash
+sudo mkdir -p /var/spool/slurmctld
+sudo chown hbz:hbz /var/spool/slurmctld/
+```
+After this, if you start slurmctld, it will tell you that you didn't configure database.
+
+### 4. Install mysql database for slurm accounting
+Install mysql-server
+```bash
+sudo apt install mysql-server libmysqlclient-dev
+```
+Configuration of mysql-server  
+Copy my.cnf to /etc/mysql/
+```bash
+sudo cp /storage/my.conf /etc/mysql/my.conf
+```
+Open a mysql terminal by:
+```bash
+sudo mysql -u root
+```
+In mysql terminal  
+```bash
+CREATE DATABASE slurm_acct_db;
+CREATE USER 'hbz'@'localhost';
+ALTER USER 'hbz'@'localhost' IDENTIFIED BY '1234';
+GRANT ALL ON slurm_acct_db.* TO 'hbz'@'localhost';
+FLUSH PRIVILEGES;
+quit;
+```
+```bash
+sudo systemctl restart mysql
+```
+
+Install slurmdbd
+```bash
+sudo apt-get -y install slurmdbd
+```
+Add a /opt/slurm/log/slurmdbd.log  
+Give permission to to slurm:slurm
+```bash
+sudo mkdir -p /opt/slurm/log 
+sudo touch /opt/slurm/log/slurmdbd.log
+sudo chown hbz:hbz /opt/slurm/log/slurmdbd.log
+sudo chown hbz:hbz /run/slurmdbd.pid
+```
+After slurmdbd is running, add cluster name to database
+```bash
+sudo sacctmgr add cluster cluster
+```
+
+### 4. start slurmctld, slurmdbd at master node
+On master node  
+For slurm scheduler:
+```bash
+sudo systemctl enable munge
+sudo systemctl start munge
+sudo systemctl enable slurmctld
+sudo systemctl start slurmctld
+```
+For slurm database
+```bash
+sudo systemctl enable slurmdbd
+sduo systemctl start slrumdbd
+```
+add the cluster name to database 
+```bash
+sacctmgr add cluster cluster 
+```
+
+### 5. Start slurmd for compute node
+On all compute nodes, copy cgroup.conf to /etc/slurm-llns
+```bash
+sudo copy /storage/cgroup.conf /etc/slurm-llns
+```
+
+```bash 
+sudo systemctl enable slurmd
+sudo systemctl restart slurmd
+
+```
+
+
+## Debug tools 
+
+```bash
+ sudo slurmctld -D
+ sudo slurmdbd -D -vvv
+ sudo slurmd -D
+```
+## 3.Test cluster parallel computation with tensorflow
+Install parallel computation mpich module
+
+```bash
+sudo apt-get install mpich
+```
