@@ -25,7 +25,7 @@ sudo mkdir /storage
 This storage location can be mouted hard disk  
 Change ownership of this position, for this example, i give permission to default slurm user, this user will be used for slurm.  
 ```bash
-sudo chown zhb:zhb h /storage
+sudo chown zhb:zhb  /storage
 ```
 Adding line /etc/exports with 
 ```bash
