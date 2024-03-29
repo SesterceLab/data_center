@@ -1,4 +1,8 @@
 
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '' 
+#! this tells the system we dont have gpu
+
 import tensorflow as tf
 from tensorflow.keras import layers, models, optimizers
 from tensorflow.keras.datasets import mnist
