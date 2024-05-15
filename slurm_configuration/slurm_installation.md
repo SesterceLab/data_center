@@ -34,6 +34,10 @@ sudo nano /etc/exports
 ```bash
 /storage 192.168.100.155(rw,no_subtree_check,sync,no_root_squash,anonuid=999999,anongid=999999) 192.168.100.207(rw,no_subtree_check,sync,no_root_squash,anonuid=999999,anongid=999999) 192.168.100.148(rw,no_subtree_check,sync,no_root_squash,anonuid=999999,anongid=999999) 192.168.100.156(rw,no_subtree_check,sync,no_root_squash,anonuid=999999,anongid=999999)
 ```
+Give premission to all 192.168.100.xxx subnet
+```bash
+/storage 192.168.100.0/24(rw,no_subtree_check,sync,no_root_squash,anonuid=999999,anongid=999999)
+```
 Note the format is /storage+space+ip()then space +nextip()...  
 Restart NFS-server
 ```
