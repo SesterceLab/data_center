@@ -158,7 +158,7 @@ For master nodes:
 
 ```bash
 sudo mkdir -p /var/spool/slurmctld
-sudo chown hbz:hbz /var/spool/slurmctld/
+sudo chown slurm:slurm /var/spool/slurmctld/
 ```
 After this, if you start slurmctld, it will tell you that you didn't configure database.
 
