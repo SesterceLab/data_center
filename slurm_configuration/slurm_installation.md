@@ -245,6 +245,24 @@ sudo systemctl restart slurmd
  sudo slurmdbd -D -vvv
  sudo slurmd -D
 ```
+
+## Create folders for slurmd
+
+```bash# Ensure the log file has the correct permissions
+sudo touch /var/log/slurmd.log
+sudo chown slurm:slurm /var/log/slurmd.log
+sudo chmod 0644 /var/log/slurmd.log
+
+# Ensure the spool directory has the correct permissions
+sudo mkdir -p /var/spool/slurmd
+sudo chown -R slurm:slurm /var/spool/slurmd
+sudo chmod 0755 /var/spool/slurmd
+
+# Install hwloc if not already installed
+sudo apt-get install hwloc
+```
+
+
 ## 3.Test cluster parallel computation with tensorflow
 Install parallel computation mpich module
 
