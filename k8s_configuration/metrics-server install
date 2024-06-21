@@ -1,0 +1,14 @@
+# on BOTH master and worker node, go to /var/lib/kubelet/config.yaml
+# need root permission to open this file 
+# at the end of this file add
+```bash
+serverTLSBootstrap: true
+```
+# at master node, 
+```
+kubectl get csr
+```7
+# then 
+# Approve the CSR for the worker node
+kubectl certificate approve csr-7qfxw
+kubectl certificate approve csr-z2n46
