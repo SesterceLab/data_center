@@ -267,5 +267,5 @@ sudo apt-get install hwloc
 Install parallel computation mpich module
 
 ```bash
-sudo apt-get install mpich
+sudo apt-get install openmpi-bin openmpi-common libopenmpi-dev
 ```
